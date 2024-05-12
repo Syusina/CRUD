@@ -1,12 +1,11 @@
 const http = require("http");
-const { stringify } = require("querystring");
 const sqlite3 = require("sqlite3").verbose();
 
 const db = new sqlite3.Database("empresa.db", (err) => {
   if (err) {
     console.error(err);
   } else {
-    console.log("Success");
+    console.log("Connection successfully established");
   }
 });
 
@@ -23,13 +22,13 @@ db.run(
     if (err) {
       console.error(err);
     } else {
-      console.log("Table create success");
+      console.log("Successfully created table");
     }
   }
 );
 
 const search = (callback) => {
-  db.all("SELECT * FROM Products", (err, rows) => {
+  db.all("SELECT * FROM products", (err, rows) => {
     if (err) {
       console.error(err);
     } else {
@@ -45,18 +44,18 @@ const insertData = db.prepare(
     if (err) {
       console.error(err);
     } else {
-      console.log("Data insert success");
+      console.log("Successfully entered data");
     }
   }
 );
 
 const deleteData = db.prepare(
-  `FELETE FROM    Products WHERE PriductId == ?`,
+  `DELETE FROM Products WHERE PriductId == ?`,
   (err) => {
     if (err) {
       console.error(err);
     } else {
-      console.log("Data delete success");
+      console.log("Successfully deleted data");
     }
   }
 );
@@ -64,7 +63,7 @@ const deleteData = db.prepare(
 const modifyData = db.prepare(
   `UPDATE Products
     SET ProductName = ?,
-        SupplierId = ?,
+        SupplierID = ?,
         CategoryID = ?,
         Unit = ?,
         Price = ?,
@@ -73,7 +72,7 @@ const modifyData = db.prepare(
     if (err) {
       console.error(err);
     } else {
-      console.log("Data modify success");
+      console.log("Successfully modified data");
     }
   }
 );
@@ -84,7 +83,7 @@ const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   search((result) => {
-    res.write(JSON, stringify(result));
+    res.write(JSON.stringify(result));
     res.end();
   });
 
@@ -104,7 +103,7 @@ const server = http.createServer((req, res) => {
         parsedBody.Unit,
         parsedBody.Price
       );
-      console.log("Data create success");
+      console.log("Successfully created data");
     });
   } else if (req.method === "DELETE") {
     let body = "";
@@ -115,7 +114,7 @@ const server = http.createServer((req, res) => {
       const parsedBody = JSON.parse(body);
       console.log(parsedBody);
       deleteData.run(parsedBody.PruductID);
-      console.log("Data delete success");
+      console.log("Successfully deleted data");
     });
   } else if (req.method === "PUT") {
     let body = "";
@@ -133,11 +132,11 @@ const server = http.createServer((req, res) => {
         parsedBody.Unit,
         parsedBody.Price
       );
-      console.log("Data modify success");
+      console.log("Successfully modified data");
     });
   }
 });
 
 const port = 3000;
 server.listen(port);
-console.log(`Server on port ${port}`);
+console.log(`Server listening on Port ${port}`);

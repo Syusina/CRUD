@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "../styles/FormData.css";
-
 
 function FormData() {
   const [result, setResult] = useState();
@@ -16,12 +15,58 @@ function FormData() {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    fetch("http://localhost:3000")
+      .then((res) => res.json())
+      .then((data) => {
+        setResult(data);
+
+        const foundItem = data.find(
+          (item) => window.location.pathname === `/modify/${item.ProductID}`
+        );
+
+        if (foundItem) {
+          setDataToInsert((prevState) => ({
+            ...prevState,
+            ...foundItem,
+          }));
+        } else {
+          if (!redirected) {
+            setRedirected(true);
+            navigate("/");
+          }
+        }
+      })
+      .catch((err) => {
+        console.error(err)
+      })
+  }, []);
+
   const handleSubmit = (e) => {
-    e.preventDefault();
+    const foundItem = result.find(
+      (item) => window.location.pathname === `/modify/${item.ProductID}`
+    );
+    if (foundItem) {
+      fetch("http://localhost:3000", {
+        method: "PUT",
+        body: JSON.stringify(dataToInsert),
+        headers: {"Content-Type": "application/json"},
+      })
+      navigate("/");
+    } else {
+      fetch("http://localhost:3000", {
+        method: "POST",
+        body: JSON.stringify(dataToInsert),
+        headers: {"Content-Type": "application/json"},
+      })
+    }
   };
 
   const handleChange = (e) => {
-    console.log(e);
+    setDataToInsert({
+      ...dataToInsert,
+      [e.target.name] : e.target.value,
+    })
   };
 
   return (
